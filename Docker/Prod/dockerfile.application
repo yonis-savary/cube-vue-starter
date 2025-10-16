@@ -1,0 +1,69 @@
+# Stage 1 - Build Frontend
+FROM node:22-alpine as frontend
+
+ARG UID=1000
+ARG GID=1000
+
+RUN apk add --no-cache shadow \
+ && groupmod -g ${GID} node \
+ && usermod -u ${UID} node \
+ && apk del shadow
+
+WORKDIR /app
+
+COPY ./Frontend/package*.json .
+RUN npm install
+
+COPY ./Frontend/ .
+
+RUN chown -R node:node /app
+
+RUN npm run build
+RUN test -f /app/dist/index.html || (echo "Build failed !" && exit 1)
+
+
+
+
+# Stage 2 - Build Backend-Frontend Hybrid App
+FROM php:8.2-fpm as application
+
+ARG UID=1000
+ARG GID=1000
+
+RUN usermod -u ${UID} www-data
+RUN groupmod -g ${GID} www-data
+
+
+RUN apt-get update && apt-get install -y nano \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN pecl install apcu \
+    && docker-php-ext-enable apcu
+
+RUN apt-get update \
+    && apt-get install -y unzip git libzip-dev libpng-dev \
+    && docker-php-ext-install zip \
+    && curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+
+RUN echo "apc.enable_cli=1" > /usr/local/etc/php/conf.d/apcu.ini \
+    && echo "apc.enable=1"    >> /usr/local/etc/php/conf.d/apcu.ini \
+    && echo "chdir = /app/Public" >> /usr/local/etc/php-fpm.d/www.conf
+
+WORKDIR /app
+
+COPY ./composer.* .
+
+RUN composer install
+
+COPY . .
+
+COPY --from=frontend /app/dist ./frontend
+
+RUN chown -R www-data:www-data /app
+
+EXPOSE 9000
+
+#DEBUG
+#CMD ["tail", "-f", "/dev/null"]
+
+CMD ["php-fpm"]
