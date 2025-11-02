@@ -42,8 +42,10 @@ RUN pecl install apcu \
     && docker-php-ext-enable apcu
 
 RUN apt-get update \
-    && apt-get install -y unzip git libzip-dev libpng-dev \
-    && docker-php-ext-install pdo pdo_mysql zip gd \
+    && apt-get install -y unzip git nano \
+    && apt-get install -y libzip-dev libpng-dev libwebp-dev libjpeg-dev libfreetype-dev \
+    && docker-php-ext-configure gd --with-jpeg --with-webp --with-freetype \
+    && docker-php-ext-install pdo pdo_mysql zip gd exif \
     && curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
 RUN echo "apc.enable_cli=1" > /usr/local/etc/php/conf.d/apcu.ini \

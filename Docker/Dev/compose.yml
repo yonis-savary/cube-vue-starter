@@ -16,18 +16,18 @@ services:
     volumes:
       - ../../App:/var/www/App
       - ../../Public:/var/www/Public
-      - ../../Storage:/var/www/Storage
+      - ../app_storage:/var/www/Storage
 
   frontend:
     build:
-      context: ../../Frontend
-      dockerfile: ../Docker/Dev/dockerfile.frontend
+      context: ../..
+      dockerfile: Docker/Dev/dockerfile.frontend
       args:
         UID: ${UID}
         GID: ${GID}
     user: node
     env_file:
-      - ../Frontend/.env
+      - ../../.env
     ports:
       - "${FRONTEND_PORT:-8001}:5173"
     volumes:
