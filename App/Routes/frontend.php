@@ -12,4 +12,7 @@ if (env("ENV", "debug") !== "production") {
 
 $directory = Path::relative("frontend");
 $server = new StaticServer($directory);
-Router::getInstance()->addService($server);
+
+$router = Router::getInstance();
+$router->addService($server);
+$server->registerFallbackRoute($router);

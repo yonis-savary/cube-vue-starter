@@ -1,7 +1,7 @@
 version: "3.9"
 
 services:
-  backend:
+  backend: &backend
     build:
       context: ../..
       dockerfile: Docker/Dev/dockerfile.backend
@@ -27,7 +27,7 @@ services:
         GID: ${GID}
     user: node
     env_file:
-      - ../../.env
+      - ../Frontend/.env
     ports:
       - "${FRONTEND_PORT:-8001}:5173"
     volumes:

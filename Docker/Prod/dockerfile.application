@@ -15,6 +15,7 @@ COPY ./Frontend/package*.json .
 RUN npm install
 
 COPY ./Frontend/ .
+COPY ./.env .
 
 RUN chown -R node:node /app
 
@@ -42,12 +43,18 @@ RUN pecl install apcu \
 
 RUN apt-get update \
     && apt-get install -y unzip git libzip-dev libpng-dev \
-    && docker-php-ext-install zip \
+    && docker-php-ext-install pdo pdo_mysql zip gd \
     && curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
 RUN echo "apc.enable_cli=1" > /usr/local/etc/php/conf.d/apcu.ini \
     && echo "apc.enable=1"    >> /usr/local/etc/php/conf.d/apcu.ini \
     && echo "chdir = /app/Public" >> /usr/local/etc/php-fpm.d/www.conf
+
+# Put sessions in a specific directory (which is linked to a volume)
+# Makes sessions persistents between restarts !
+RUN echo 'session.save_path = "/var/lib/php/sessions"' >> /usr/local/etc/php/conf.d/docker-session.ini \
+    && mkdir -p /var/lib/php/sessions \
+    && chown www-data:www-data /var/lib/php/sessions
 
 WORKDIR /app
 
