@@ -4,3 +4,5 @@ Storage
 
 # Uncomment this line in your project
 composer.lock
+
+Docker/app_storage

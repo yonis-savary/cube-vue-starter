@@ -3,8 +3,7 @@ FROM php:8.2-apache
 ARG UID=1000
 ARG GID=1000
 
-RUN usermod -u ${UID} www-data
-RUN groupmod -g ${GID} www-data
+RUN usermod -u ${UID} www-data && groupmod -g ${GID} www-data
 
 COPY Docker/Dev/vhost.conf /etc/apache2/sites-available/000-default.conf
 
@@ -27,9 +26,8 @@ COPY ./composer.lock ./composer.lock
 COPY ./do ./do
 COPY ./cube.php ./cube.php
 
-RUN composer install
-
-RUN chown -R www-data:www-data /var/www
+RUN composer install \
+    && chown -R www-data:www-data /var/www
 
 EXPOSE 80
 CMD ["apache2-foreground"]
