@@ -39,6 +39,8 @@ RUN usermod -u ${UID} www-data \
     && docker-php-ext-configure gd --with-jpeg --with-webp --with-freetype \
     && docker-php-ext-install pdo pdo_mysql zip gd exif \
     && curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer \
+    # PHP Redis Extension
+    && pecl install redis && docker-php-ext-enable redis \
     # PHP APCU Extension
     && pecl install apcu \
     && docker-php-ext-enable apcu \
